@@ -95,6 +95,7 @@ export default {
       this.photoUrl = blob.url
     },
     photoResize({eventName, left, top, width, height}) {
+      if (isNaN(left)) throw new Error('Bad resize')
       this.photo.left = left
       this.photo.top = top
       this.photo.width = width
@@ -119,6 +120,7 @@ export default {
     },
     onMousewheel(ev, img) {
       ev.preventDefault()
+      if (!ev.deltaY) return
       const d = ev.deltaY / Math.abs(ev.deltaY)
       const box = this.$refs.photoBox
       const x = ev.offsetX, y = ev.offsetY
