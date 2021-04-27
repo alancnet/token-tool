@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import Jimp from 'jimp'
+import { createMask } from './image-processing.js'
 
 export async function getLibrary() {
   const library = {
@@ -35,6 +36,10 @@ export async function getLibrary() {
         if (!frames[name]) frames[name] = {name}
         frames[name][type] = path.join('assets/frames', directory.name, file.name)
       }
+      // } else {
+      //   const name = file.name.split('.').reverse().slice().reverse().join('.')
+      //   frames[name][overlay] = path.join('assets/frames', directory.name, file.name)
+      // }
     }
     const framesArray = Object.values(frames).filter(x => x.mask && x.overlay)
     for (const frame of framesArray) {
