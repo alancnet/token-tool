@@ -13,17 +13,29 @@ async function main() {
     const files = (await fs.promises.readdir(path.join('assets/frames', directory.name), {withFileTypes: true}))
     const frames = {}
     for (const file of files) {
-      if (file.name.endsWith('.png') && !file.name.startsWith('mask-') && !file.name.startsWith('overlay-')) {
-        fs.renameSync(path.join('assets/frames', directory.name, file.name), path.join('assets/frames', directory.name, 'overlay-' + file.name))
-        continue
+      if (file.name.endsWith(' .png')) {
+        const newName = file.name.split(' .png').join('.png')
+        fs.renameSync(path.join('assets/frames', directory.name, file.name), path.join('assets/frames', directory.name, newName))
+        file.name = newName
       }
-      const [type, name] = file.name.split('.').reverse().slice(1).reverse().join('.').split('-')
+      if (file.name.endsWith('.png') && !file.name.startsWith('mask-') && !file.name.startsWith('overlay-')) {
+        const newName = 'overlay-' + 
+          file.name
+            .split('_').join(' ')
+            .split('Frame.png').join('.png')
+        fs.renameSync(path.join('assets/frames', directory.name, file.name), path.join('assets/frames', directory.name, newName))
+        file.name = newName
+      }
+      const [type, ...nameParts] = file.name.split('.').reverse().slice(1).reverse().join('.').split('-')
+      const name = nameParts.join('-')
       if (type === 'overlay') {
         const overlayFilename = path.join('assets/frames', directory.name, file.name)
         const maskFilename = path.join('assets/frames', directory.name, 'mask-' + name + '.png')
-        const image = await Jimp.read(overlayFilename)
-        const mask = createMask(image)
-        await mask.writeAsync(maskFilename)
+        if (!fs.existsSync(maskFilename)) {
+          const image = await Jimp.read(overlayFilename)
+          const mask = createMask(image)
+          await mask.writeAsync(maskFilename)
+        }
       }
       if (['mask', 'overlay'].includes(type)) {
         if (!frames[name]) frames[name] = {name}
